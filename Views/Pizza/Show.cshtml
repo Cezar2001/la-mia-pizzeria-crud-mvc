@@ -19,10 +19,12 @@
 
 
         <div class="card">
-            <img src="@Model.Foto" class="" />
+            <img src="@Model.sFoto" class="" />
             <h1 class="titolo">@Model.Nome</h1>
             <p class="descrizione">@Model.Descrizione</p>
             <p class="prezzo"> @Model.Prezzo euro</p>
+            <button class=""><a href="@Url.Action("Edit","Pizza",new {@Model.Id})">Modifica</a></button>
+            <button class=""><a href="@Url.Action("Delete","Pizza",new {@Model.Id})">Elimina</a></button>
         </div>
 
 

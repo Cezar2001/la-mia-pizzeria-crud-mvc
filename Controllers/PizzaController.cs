@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using la_mia_pizzeria_static.Models;
+using System.Diagnostics;
 
 namespace la_mia_pizzeria_static.Controllers
 {
@@ -80,6 +81,68 @@ namespace la_mia_pizzeria_static.Controllers
 
             Pizze.ListaDiPizze.Add(nuovaPizza);
             return View(nuovaPizza);
+        }
+
+        public IActionResult Edit(int id)
+        {
+            return View("Edit", Pizze.ListaDiPizze[id]);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ModificaPizza(Pizza DatiPizza)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("CreaFormPizza", DatiPizza);
+            }
+
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\File");
+            //crea folder if not exist
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            //get file extension
+
+            FileInfo fileInfo = new FileInfo(DatiPizza.Foto.FileName);
+            string fileName = DatiPizza.Nome + fileInfo.Extension;
+            string fileNameWithPath = Path.Combine(path, fileName);
+            using (var stream = new FileStream(fileNameWithPath, FileMode.Create))
+            {
+                DatiPizza.Foto.CopyTo(stream);
+            }
+
+
+
+            Pizza updatePizza = Pizze.ListaDiPizze.Find(x => x.Id == DatiPizza.Id);
+
+            updatePizza.Nome = DatiPizza.Nome;
+            updatePizza.Descrizione = DatiPizza.Descrizione;
+            if (updatePizza.Foto != DatiPizza.Foto)
+            {
+                updatePizza.Foto = DatiPizza.Foto;
+                updatePizza.sFoto = "/File/" + fileName;
+
+
+            }
+            else
+            {
+                updatePizza.Foto = DatiPizza.Foto;
+                updatePizza.sFoto = DatiPizza.sFoto;
+            }
+
+            updatePizza.Prezzo = DatiPizza.Prezzo;
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            Pizza pizzaRemove = Pizze.ListaDiPizze.Find(x => x.Id == id);
+            Pizze.ListaDiPizze.Remove(pizzaRemove);
+            return RedirectToAction("Index");
         }
     }
 }
